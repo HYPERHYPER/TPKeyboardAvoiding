@@ -12,9 +12,14 @@
 
 @implementation TPKeyboardAvoidingScrollView
 
+@synthesize shouldResignTextFields;
+
 #pragma mark - Setup/Teardown
 
 - (void)setup {
+    
+    [self setShouldResignTextFields:YES];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(TPKeyboardAvoiding_keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(TPKeyboardAvoiding_keyboardWillHide:) name:UIKeyboardWillHideNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(scrollToActiveTextField) name:UITextViewTextDidBeginEditingNotification object:nil];
@@ -70,13 +75,17 @@
 }
 
 - (void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    [[self TPKeyboardAvoiding_findFirstResponderBeneathView:self] resignFirstResponder];
+    if (shouldResignTextFields) {
+        [[self TPKeyboardAvoiding_findFirstResponderBeneathView:self] resignFirstResponder];
+    }
     [super touchesEnded:touches withEvent:event];
 }
 
 -(BOOL)textFieldShouldReturn:(UITextField *)textField {
     if ( ![self focusNextTextField] ) {
-        [textField resignFirstResponder];
+        if  (shouldResignTextFields) {
+            [textField resignFirstResponder];
+        }
     }
     return YES;
 }
